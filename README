@@ -23,19 +23,23 @@ Example
 
 Details
 +-------
-| 09:09 <dav> so basically... you run 'rackjour' on some host, and it advertises itself as a rackjour worker, via bonjour
-| 09:09 <dav> when you run a rack app that uses Rackjour::Master, it starts a thread that looks for these rackjour workers
+| 09:09 <dav> so basically... you run 'rackjour' on some host, and it advertises itself as a rackjour worker, via
+|             bonjour
+| 09:09 <dav> when you run a rack app that uses Rackjour::Master, it starts a thread that looks for these rackjour
+|             workers
 | 09:10 <dav> when it does, it tars itself and sends itself to the other host, and then runs each rack app on there
 | 09:10 <julio> ok... so instead of deploying to multiple hosts
 | 09:10 <julio> you use that
 | 09:10 <dav> yes
-| 09:10 <dav> when a request comes in to the rack app, when it gets to Rackjour::Master#call, it looks at @servers for valid hosts and sends the request there
+| 09:10 <dav> when a request comes in to the rack app, when it gets to Rackjour::Master#call, it looks at @servers for
+|             valid hosts and sends the request there
 | 09:10 <dav> by "sends the request there" i mean
 | 09:10 <julio> yeah, sends the environment
 | 09:10 <julio> parsed by rack
 | 09:11 <dav> it iterates over all rack apps configured, calling each one in turn
 | 09:11 <dav> in the example, it's "use Rackjour::Master; use Pokey; use Geokit; run Example"
-| 09:11 <dav> so Rackjour::Master#send: @servers.random.call(Example, @servers.random.call(Geokit, @servers.random.call(Pokey, env)))
+| 09:11 <dav> so Rackjour::Master#send: @servers.random.call(Example, @servers.random.call(Geokit,
+|             @servers.random.call(Pokey, env)))
 | 09:11 <dav> basically
 | 09:12 <dav> it's not actually hardcoded like that
 | 09:12 <julio> so theres 2 things its doing there
