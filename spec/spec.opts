@@ -1,0 +1,5 @@
+--colour
+--loadby mtime
+--reverse
+--require spec/custom_spec_formatter.rb
+--format CustomSpecFormatter
