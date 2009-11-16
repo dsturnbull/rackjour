@@ -1,5 +1,3 @@
-require 'vendor/gems/environment'
-
 require 'drb'
 require 'dnssd'
 require 'tmpdir'

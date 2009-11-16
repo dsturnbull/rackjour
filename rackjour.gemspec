@@ -1,13 +1,14 @@
 Gem::Specification.new do |s|
   s.name = %q{rackjour}
-  s.version = '0.1.1'
+  s.version = '0.1.8'
 
   s.required_rubygems_version = Gem::Requirement.new('>= 0') if s.respond_to? :required_rubygems_version=
   s.authors = ['David Turnbull']
   s.date = %q{2009-11-16}
   s.description = %q{Distribute your rack apps across the network with bonjour}
   s.email = %q{dsturnbull@gmail.com}
-  s.files = ['Gemfile', 'lib', 'lib/rackjour', 'lib/rackjour/master.rb', 'lib/rackjour/server.rb', 'lib/rackjour/worker.rb', 'lib/rackjour.rb', 'rackjour.gemspec', 'Rakefile']
+  s.files = ['Gemfile', 'lib', 'lib/rackjour', 'lib/rackjour/master.rb', 'lib/rackjour/server.rb', 'lib/rackjour/worker.rb', 'lib/rackjour.rb', 'rackjour.gemspec', 'Rakefile', 'bin/rackjour'] + Dir['vendor/gems/**/*']
+  s.executables = ['rackjour']
 
   s.homepage = %q{http://github.com/dsturnbull/rackjour}
   s.rdoc_options = ['--charset=UTF-8']

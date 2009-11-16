@@ -54,7 +54,6 @@ module Rackjour
           if line =~ /require ['"](.+)['"]$/
             req = $1
             req = File.join(@base_dir, req) if req =~ /environment/
-            log "require #{req}"
             require req
           end
         end

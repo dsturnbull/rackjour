@@ -1,0 +1,22 @@
+Installation
++------------
+| gem install rackjour
+
+Usage
++-----
+| in your config.ru, use Rackjour::Master
+| 
+| on your app servers, run 'rackjour' (takes -d for daemon mode)
+| 
+| rackjour will distribute your app to each host running rackjour,
+| and run each rack app in your rackup config on the least loaded host
+| 
+
+Example
+|-------
+| in rackjour/spec/fixtures/example_app/
+| $ rackup      
+|       
+| in another terminal
+| $ rackjour      
+|                 

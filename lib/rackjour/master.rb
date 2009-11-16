@@ -5,7 +5,7 @@ Thread.abort_on_exception = true
 module Rackjour
   class Master
     class << self
-      @@version = `find . | xargs ruby -rmd5 -e 'puts Digest::SHA256.hexdigest ARGV.map { |file| File.stat(file).mtime }.inject(0) { |sum, mtime| sum += mtime.to_i }.to_s'`.strip
+      @@version = 'x.x.x'
     end
 
     def initialize(app)
