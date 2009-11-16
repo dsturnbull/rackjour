@@ -1,5 +1,4 @@
-require 'lib/rackjour'
-require 'spec/fixtures/example_app/example' # FIXME once gemmed
+require 'rackjour'
 
 module Rackjour
   class Worker
@@ -26,9 +25,10 @@ module Rackjour
       @apps[app] = app.new
     end
 
-    def setup(version, tar)
+    def setup(version, tar, config)
       @version = version
       @deployed = false
+      @config = config
 
       @base_dir = Dir.mktmpdir
       log "installing to #{@base_dir}"
@@ -40,12 +40,25 @@ module Rackjour
         `tar zxf app.tgz`
       end
 
-      #load_deps
+      load_deps
     end
 
     def call(app, env)
       log app
       @apps[app].call(env)
+    end
+
+    def load_deps
+      Dir.chdir(@base_dir) do
+        File.readlines(@config).each do |line|
+          if line =~ /require ['"](.+)['"]$/
+            req = $1
+            req = File.join(@base_dir, req) if req =~ /environment/
+            log "require #{req}"
+            require req
+          end
+        end
+      end
     end
 
     def log(str)

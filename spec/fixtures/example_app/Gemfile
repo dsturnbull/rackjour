@@ -1,0 +1,5 @@
+disable_system_gems
+gem 'sinatra'
+gem 'geokit'
+gem 'rackjour'
+

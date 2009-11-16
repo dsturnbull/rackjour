@@ -1,7 +1,6 @@
-# FIXME once gemmed
 require 'vendor/gems/environment'
-require 'spec/fixtures/example_app/example'
-require 'lib/rackjour'
+require 'example'
+require 'rackjour'
 
 use Rackjour::Master
 use Pokey

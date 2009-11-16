@@ -1,4 +1,4 @@
-require 'lib/rackjour'
+require 'rackjour'
 
 Thread.abort_on_exception = true
 
@@ -15,8 +15,10 @@ module Rackjour
 
       if ARGV[0] && File.exist?(ARGV[0])
         @base_dir = File.dirname(ARGV[0])
+        @config = File.basename(ARGV[0])
       else
         @base_dir = Dir.pwd
+        @config = 'config.ru'
       end
 
       tar(@base_dir)
@@ -29,10 +31,14 @@ module Rackjour
     end
 
     def call(env)
-      @apps.each do |app|
-        env = @servers.first.call(app, env)
+      if @servers.any?
+        @apps.each do |app|
+          env = @servers.first.call(app, env)
+        end
+        env
+      else
+        @app.call(env)
       end
-      env
     end
 
     def discover_workers
@@ -78,7 +84,7 @@ module Rackjour
                                                       reply.type,
                                                       reply.domain) do |r|
           unless @servers.detect { |s| s.target == r.target }
-            @servers << Rackjour::Server.new(r.target, @@version, @tar)
+            @servers << Rackjour::Server.new(r.target, @@version, @tar, @config)
           end
         end
         resolver_service.stop
