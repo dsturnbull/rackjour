@@ -1,35 +1,12 @@
 require 'lib/rackjour'
 
+Thread.abort_on_exception = true
+
 module Rackjour
   class Master
     class << self
-      @@apps = []
       @@version = `find . | xargs ruby -rmd5 -e 'puts Digest::SHA256.hexdigest ARGV.map { |file| File.stat(file).mtime }.inject(0) { |sum, mtime| sum += mtime.to_i }.to_s'`.strip
-
-      def to_app
-        @ins[-1] = Rack::URLMap.new(@ins.last)  if Hash === @ins.last
-        inner_app = @ins.last
-        @ins[0...-1].reverse.inject(inner_app) { |a, e| e.call(a) }
-      end
-
-      #def call(app, env)
-      #  #@@instance.servers.first.call(app.class.to_s, env)
-      #  app.call(env)
-      #  #require 'ruby-debug'
-      #  #debugger
-      #  #@@endpoint.call @@instance.servers.first.call(app.class.to_s, env)
-      #end
-
-      def register_app(middleware)
-        @@apps << middleware
-      end
-
-      def begin(instance)
-        @@instance.begin
-      end
     end
-
-    attr_reader :servers
 
     def initialize(app)
       @app = app
@@ -37,81 +14,76 @@ module Rackjour
       @servers = []
 
       if ARGV[0] && File.exist?(ARGV[0])
-        @config = File.basename(ARGV[0])
         @base_dir = File.dirname(ARGV[0])
       else
-        @config = 'config.ru'
         @base_dir = Dir.pwd
       end
 
       tar(@base_dir)
-    end
 
-    def begin
+      sleep 1
+
+      load_apps
       Thread.new { discover_workers }
       Thread.new { deploy_apps }
-      Thread.new { reaper }
-      Thread.new { status }
     end
 
     def call(env)
-      @app.call(env)
+      @apps.each do |app|
+        env = @servers.first.call(app, env)
+      end
+      env
     end
 
     def discover_workers
-      begin
-        DNSSD.browse '_druby._tcp' do |reply|
-          next if reply.flags.more_coming?
-          update_workers(reply)
-        end
-      rescue Exception => e
-        p e
-        sleep 1
+      DNSSD.browse '_druby._tcp' do |reply|
+        next if reply.flags.more_coming?
+        update_workers(reply)
       end
     end
 
     def deploy_apps
       while true
-        begin
-          @servers.reject(&:deployed?).each do |server|
-            server.add_jobs(@@apps)
-          end
-        rescue Exception => e
-          p e
+        @servers.reject(&:deployed?).each do |server|
+          server.add_apps(@apps, @terminator)
         end
-        sleep 1
-      end
-    end
-
-    def reaper
-      while true
-        sleep 1
-      end
-    end
-
-    def status
-      while true
         sleep 1
       end
     end
 
   private
-    def update_workers(reply)
-      begin
-        if reply.flags.add?
-          resolver_service = DNSSD::Service.new.resolve(reply.name,
-                                                        reply.type,
-                                                        reply.domain) do |r|
-            unless @servers.detect { |s| s.target == r.target }
-              @servers << Rackjour::Server.new(r.target, @@version, @config, @tar)
-            end
-          end
-          resolver_service.stop
-        else
-          @servers.delete(reply.domain)
+    def load_apps
+      @apps ||= []
+      return @apps unless @apps.empty?
+
+      next_app = @app
+      while true
+        @apps << next_app.class
+        next_app = next_app.instance_eval { @app }
+
+        break if next_app.nil?
+
+        if next_app.class == Class
+          @apps << next_app
+          break
         end
-      rescue Exception => e
-        p e
+      end
+      @terminator = @apps.last
+      @apps
+    end
+
+    def update_workers(reply)
+      if reply.flags.add?
+        resolver_service = DNSSD::Service.new.resolve(reply.name,
+                                                      reply.type,
+                                                      reply.domain) do |r|
+          unless @servers.detect { |s| s.target == r.target }
+            @servers << Rackjour::Server.new(r.target, @@version, @tar)
+          end
+        end
+        resolver_service.stop
+      else
+        @servers.delete(reply.domain)
       end
     end
 

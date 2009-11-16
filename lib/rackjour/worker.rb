@@ -1,9 +1,8 @@
 require 'lib/rackjour'
+require 'spec/fixtures/example_app/example' # FIXME once gemmed
 
 module Rackjour
   class Worker
-    include DRbUndumped
-
     @@started = false
 
     def initialize
@@ -15,14 +14,19 @@ module Rackjour
       end
     end
 
-    def add_job(app)
-      log "#{@version} #{app}"
+    def add_app(app)
       @apps ||= {}
-      #app = Rackjour::App.new(app, @version, @config, @base_dir, app_port(app))
+      log "job: #{@version} #{app}"
+      rack_app = app.new(lambda { |env| env })
+      @apps[app] = rack_app
     end
 
-    def setup(version, config, tar)
-      @config = config
+    def add_terminator(app)
+      log "job: #{@version} #{app} (terminator)"
+      @apps[app] = app.new
+    end
+
+    def setup(version, tar)
       @version = version
       @deployed = false
 
@@ -40,26 +44,8 @@ module Rackjour
     end
 
     def call(app, env)
-      unless app.nil?
-        #Rack::Builder.new.override_rack_app(app)
-        app.new.call(env)
-      end
-      #if @apps[app]
-      #  log "handling request for #{app}"
-      #  @apps[app].rackjour_local_call(env)
-      #else
-      #  {}
-      #end
-    end
-
-    def load_deps
-      Dir.chdir(@base_dir) do
-        File.read(@config).split("\n").each do |line|
-          if line =~ /^require/
-            eval line
-          end
-        end
-      end
+      log app
+      @apps[app].call(env)
     end
 
     def log(str)

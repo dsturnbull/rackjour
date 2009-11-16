@@ -4,12 +4,11 @@ module Rackjour
   class Server
     attr_reader :target
 
-    def initialize(target, version, config, tar)
+    def initialize(target, version, tar)
       @target = target
       log 'initialize'
 
       @tar = tar
-      @config = config
       @version = version
       @apps = []
       @deployed = false
@@ -18,19 +17,20 @@ module Rackjour
       @conn = "druby://#{@target}:#{WORKER_PORT}"
       @drb = DRbObject.new_with_uri(@conn)
 
-      @drb.setup(@version, @config, @tar)
+      @drb.setup(@version, @tar)
     end
 
     def deployed?
       @deployed
     end
 
-    def add_jobs(apps)
-      apps.each do |app|
+    def add_apps(apps, terminator)
+      (apps - [terminator]).each do |app|
         log "job: #{@version} #{app}"
-        @drb.add_job(app)
-        @jobs << lambda { |env| @drb.call(app, env) }
+        @drb.add_app(app)
       end
+      log "job: #{@version} #{terminator} (terminator)"
+      @drb.add_terminator(terminator)
       @deployed = true
     end
 
