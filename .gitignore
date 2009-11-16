@@ -1,3 +1,5 @@
 *.swp
 vendor
 bin
+tags
+*.gem
