@@ -42,7 +42,7 @@ module Rackjour
     end
 
     def discover_workers
-      DNSSD.browse '_druby._tcp' do |reply|
+      DNSSD.browse('_druby._tcp') do |reply|
         next if reply.flags.more_coming?
         update_workers(reply)
       end
@@ -80,9 +80,11 @@ module Rackjour
 
     def update_workers(reply)
       if reply.flags.add?
-        resolver_service = DNSSD::Service.new.resolve(reply.name,
-                                                      reply.type,
-                                                      reply.domain) do |r|
+        resolver_service = DNSSD::Service.new.resolve(
+          reply.name,
+          reply.type,
+          reply.domain
+        ) do |r|
           unless @servers.detect { |s| s.target == r.target }
             @servers << Rackjour::Server.new(r.target, @@version, @tar, @config)
           end
