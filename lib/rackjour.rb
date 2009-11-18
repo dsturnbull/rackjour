@@ -8,9 +8,9 @@ require 'rack'
 require 'rack/utils'
 require 'rack/builder'
 
-require 'rackjour/worker'
-require 'rackjour/server'
-require 'rackjour/master'
+require File.dirname(__FILE__) + '/rackjour/worker'
+require File.dirname(__FILE__) + '/rackjour/server'
+require File.dirname(__FILE__) + '/rackjour/master'
 
 WORKER_PORT = 9199
 

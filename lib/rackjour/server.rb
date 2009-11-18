@@ -1,5 +1,3 @@
-require 'rackjour'
-
 module Rackjour
   class Server
     attr_reader :target

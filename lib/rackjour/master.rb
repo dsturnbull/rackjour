@@ -1,5 +1,3 @@
-require 'rackjour'
-
 Thread.abort_on_exception = true
 
 module Rackjour
