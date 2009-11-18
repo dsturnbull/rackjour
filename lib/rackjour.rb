@@ -8,6 +8,8 @@ require 'rack'
 require 'rack/utils'
 require 'rack/builder'
 
+require File.dirname(__FILE__) + '/rackjour/misc'
+require File.dirname(__FILE__) + '/rackjour/proxy'
 require File.dirname(__FILE__) + '/rackjour/worker'
 require File.dirname(__FILE__) + '/rackjour/server'
 require File.dirname(__FILE__) + '/rackjour/master'

@@ -1,4 +1,3 @@
-disable_system_gems
 gem 'cucumber'
 gem 'rspec'
 gem 'ruby-debug'
