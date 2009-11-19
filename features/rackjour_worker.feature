@@ -1,10 +1,13 @@
 Feature: Rackjour Worker
+  A worker that responds to bonjour probes
+  And allows a Rackjour master to deploy apps to it
+  And it processes 
 
   Scenario: Rackjour workers respond to bonjour probes
     Given I have a rackjour worker listening
     Then the worker is discoverable
 
-  Scenario: Rackjour workers allow Rackjour masters to deploy rack apps to them
+  Scenario: Rackjour workers allow Rackjour masters to deploy apps to them
     Given I have a rackjour worker listening
     And the worker has been set up
     When the worker receives a job request

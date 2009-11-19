@@ -1,37 +1,28 @@
 Feature: Initiating rack stack
-  A rack app consisting of some number of apps is started
+  A rack is started
   As workers are discovered
-  Each rack is deployed to each worker unless the rack is already deployed
+  Each app is deployed to each worker
 
   Scenario: App running without workers
-    Given a rack app
-      And the rack app is started
+    Given a rack
+      And the rack is started
     When I call the app
-    Then requests are local
+    Then each app is processed locally
 
-  Scenario: App running and worker added
-    Given a rack app
-      And the rack app is started
+  Scenario: App running and a worker added
+    Given a rack
+      And the rack is started
       And a worker is added
     Then all apps are distributed to the worker
     When I call the app
-    Then requests are remote
+    Then each app is processed on the worker
 
   Scenario: App running with worker, additional worker added
-    Given a rack app
-      And the rack app is started
-    Then all apps are distributed to the worker
+    Given a rack
+      And the rack is started
       And a worker is added
     Then all apps are distributed to the worker
-    When I call the app
-    Then requests are remote
-
-  Scenario: App running with worker, additional app added
-    Given a rack app
-      And the rack app is started
+    Given a worker is added
     Then all apps are distributed to the worker
     When I call the app
-    Then requests are remote
-    When I add a new app
-    Then the new services are distributed to the worker
-
+    Then each app is processed on one of the workers
