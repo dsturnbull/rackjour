@@ -14,15 +14,13 @@ module Rackjour
     def add_app(app)
       @apps ||= {}
       log "job: #{@version} #{app}"
-      capp = constantize(app)
-      rack_app = capp.new(lambda { |env| env })
+      rack_app = app.new(lambda { |env| env })
       @apps[app] = rack_app
     end
 
     def add_terminator(app)
       log "job: #{@version} #{app} (terminator)"
-      capp = constantize(app)
-      @apps[app] = capp.new
+      @apps[app] = app.new
     end
 
     def setup(version, tar, config)
@@ -51,10 +49,9 @@ module Rackjour
     def load_deps
       Dir.chdir(@base_dir) do
         File.readlines(@config).each do |line|
-          if line !~ /rackjour/ && line =~ /require ['"](.+)['"]$/
+          if line =~ /require ['"](.+)['"]$/
             req = $1
             req = File.join(@base_dir, req) if req =~ /environment/
-            log req
             require req
           end
         end

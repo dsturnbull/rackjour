@@ -25,12 +25,11 @@ module Rackjour
 
     def add_apps(apps, terminator)
       (apps - [terminator]).each do |app|
-        next if constantize(app).respond_to? :proxy
         log "job: #{@version} #{app}"
         @drb.add_app(app)
       end
       log "job: #{@version} #{terminator} (terminator)"
-      @drb.add_terminator(terminator.to_s)
+      @drb.add_terminator(terminator)
       @deployed = true
     end
 

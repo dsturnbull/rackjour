@@ -2,16 +2,8 @@ Thread.abort_on_exception = true
 
 module Rackjour
   class Master
-    attr_reader :servers
-
     class << self
       @@version = 'x.x.x'
-      @@instance = nil
-
-      def method_missing(method, *args, &block)
-        p @@instance
-         @@instance.send(method, *args, &block)
-      end
     end
 
     def initialize(app)
@@ -39,19 +31,12 @@ module Rackjour
     def call(env)
       if @servers.any?
         @apps.each do |app|
-          env = call_handling_proxies(app, env)
+          env = @servers.first.call(app, env)
         end
         env
       else
-        call_handling_proxies(@app, env)
+        @app.call(env)
       end
-    end
-
-    def call_handling_proxies(app, env)
-      if constantize(app).respond_to? :proxy
-        app = app.split(/::/).last
-      end
-      @servers.first.call(app, env)
     end
 
     def discover_workers
@@ -77,13 +62,13 @@ module Rackjour
 
       next_app = @app
       while true
-        @apps << next_app.class.to_s
+        @apps << next_app.class
         next_app = next_app.instance_eval { @app }
 
         break if next_app.nil?
 
         if next_app.class == Class
-          @apps << next_app.to_s
+          @apps << next_app
           break
         end
       end
